@@ -1,0 +1,23 @@
+rules_version = '2';
+
+// Phase 0 baseline: deny everything by default.
+//
+// Per SETUP_AND_DEPLOYMENT.md, the project must "begin with restrictive
+// rules" before any collections exist. There are no Firestore domains yet
+// (users/profiles/etc. are introduced starting Phase 1), so there is
+// nothing that legitimately needs client access at this point.
+//
+// Each later phase must add narrowly-scoped `match` blocks for the
+// collections it introduces (see ARCHITECTURE.md's Firestore domain list)
+// instead of loosening this default. Never replace this with a broad
+// `allow read, write: if true;` or `if request.auth != null;` catch-all —
+// every protected field (role, approval status, ELO/Connection Meter,
+// match assignments, audit logs, system state) must stay server-authorized
+// and never client-writable, per SECURITY_AND_TESTING.md and CLAUDE.md.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
