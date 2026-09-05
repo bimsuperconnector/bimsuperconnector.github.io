@@ -34,10 +34,6 @@ jobs:
       - name: Production build
         run: npm run build
         env:
-          # Placeholder values so the build step succeeds in CI without real
-          # secrets. This step only proves the app *builds*; it does not
-          # exercise a live Firebase project. The deploy workflow injects the
-          # real values from repository secrets.
           VITE_FIREBASE_API_KEY: ci-placeholder
           VITE_FIREBASE_AUTH_DOMAIN: ci-placeholder.firebaseapp.com
           VITE_FIREBASE_PROJECT_ID: ci-placeholder
