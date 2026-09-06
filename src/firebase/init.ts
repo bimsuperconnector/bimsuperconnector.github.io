@@ -1,22 +1,28 @@
 import { type FirebaseApp, getApps, initializeApp } from 'firebase/app';
 import { type Auth, getAuth } from 'firebase/auth';
 import { type Firestore, getFirestore } from 'firebase/firestore';
-import { type FirebaseStorage, getStorage } from 'firebase/storage';
 import { getFirebaseConfig, isFirebaseConfigured } from '../lib/env';
 
 /**
  * Single source of Firebase initialization for the whole app.
  *
  * Nothing outside this file should call `initializeApp` / `getAuth` /
- * `getFirestore` / `getStorage` directly — repositories and services import
- * `auth`, `db`, and `storage` from here instead. This keeps Firebase
- * bootstrapping isolated and easy to audit, per ARCHITECTURE.md.
+ * `getFirestore` directly — repositories and services import `auth` and
+ * `db` from here instead. This keeps Firebase bootstrapping isolated and
+ * easy to audit, per ARCHITECTURE.md.
+ *
+ * Firebase Storage is intentionally NOT initialized. Storage requires the
+ * Blaze (pay-as-you-go) billing plan even at zero usage, and the owner has
+ * decided not to introduce that paid dependency (CLAUDE.md section 14: no
+ * paid service without explicit approval — here, explicit decline).
+ * Profile photos instead use the `photoURL` already provided by Google
+ * Sign-In, at no additional cost. If a genuine need for file storage comes
+ * up later, it must be raised and approved before being added back.
  */
 
 let app: FirebaseApp | null = null;
 let auth: Auth | null = null;
 let db: Firestore | null = null;
-let storage: FirebaseStorage | null = null;
 
 export const firebaseConfigured = isFirebaseConfigured();
 
@@ -24,7 +30,6 @@ if (firebaseConfigured) {
   app = getApps().length ? getApps()[0] : initializeApp(getFirebaseConfig());
   auth = getAuth(app);
   db = getFirestore(app);
-  storage = getStorage(app);
 } else {
   // Do not throw at import time: the landing page and static routes must
   // still render (e.g. during local development before configuration is
@@ -37,4 +42,4 @@ if (firebaseConfigured) {
   );
 }
 
-export { app, auth, db, storage };
+export { app, auth, db };

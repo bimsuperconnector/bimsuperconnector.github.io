@@ -45,7 +45,7 @@ export function PrivacyPage() {
           </section>
           <section>
             <h2 className="text-title-md text-ink">Processors we rely on</h2>
-            <p>Google (Sign-In, Calendar, Meet), Firebase (Authentication, Firestore, Storage), and GitHub (Pages hosting, scheduled automation).</p>
+            <p>Google (Sign-In, Calendar, Meet), Firebase (Authentication, Firestore), and GitHub (Pages hosting, scheduled automation).</p>
           </section>
           <section>
             <h2 className="text-title-md text-ink">Retention</h2>

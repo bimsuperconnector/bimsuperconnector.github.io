@@ -18,6 +18,7 @@ import { EntrepreneurshipPage } from '../pages/app/EntrepreneurshipPage';
 import { NotificationsPage } from '../pages/app/NotificationsPage';
 import { AdminIndexPage } from '../pages/app/admin/AdminIndexPage';
 import { ProtectedRoute } from './ProtectedRoute';
+import { AdminRoute } from './AdminRoute';
 
 export function AppRouter() {
   return (
@@ -47,7 +48,14 @@ export function AppRouter() {
         <Route path="events" element={<EventsPage />} />
         <Route path="entrepreneurship" element={<EntrepreneurshipPage />} />
         <Route path="notifications" element={<NotificationsPage />} />
-        <Route path="admin" element={<AdminIndexPage />} />
+        <Route
+          path="admin"
+          element={
+            <AdminRoute>
+              <AdminIndexPage />
+            </AdminRoute>
+          }
+        />
       </Route>
 
       <Route path="*" element={<NotFoundPage />} />

@@ -3,14 +3,22 @@ import { Navigate } from 'react-router-dom';
 import { Container } from '../components/ui/Container';
 import { Button } from '../components/ui/Button';
 import { useAuth } from '../context/AuthContext';
+import { useUserRecord } from '../context/UserRecordContext';
 
 export function LoginPage() {
-  const { user, loading, configured, signInWithGoogle } = useAuth();
+  const { user, loading: authLoading, configured, signInWithGoogle } = useAuth();
+  const { record, loading: recordLoading } = useUserRecord();
   const [error, setError] = useState<string | null>(null);
   const [signingIn, setSigningIn] = useState(false);
 
-  if (configured && !loading && user) {
-    return <Navigate to="/app" replace />;
+  if (configured && !authLoading && user && !recordLoading) {
+    if (record?.status === 'approved') {
+      return <Navigate to="/app" replace />;
+    }
+    if (record) {
+      // pending or rejected — send to the status page rather than /app.
+      return <Navigate to="/pending" replace />;
+    }
   }
 
   async function handleSignIn() {

@@ -7,6 +7,7 @@ export default defineConfig({
   // Served from the root of https://bimsuperconnector.github.io/
   base: '/',
   build: {
+    chunkSizeWarningLimit: 600,
     rollupOptions: {
       output: {
         manualChunks(id) {

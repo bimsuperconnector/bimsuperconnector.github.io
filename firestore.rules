@@ -1,15 +1,61 @@
 rules_version = '2';
 
-// Phase 0 foundation rules: deny-by-default.
-//
-// No collections are read from or written to by the client yet — Phase 0
-// only ships the app shell, routing, and Firebase client initialization.
-// Every later phase (starting with Phase 1: Authentication & onboarding)
-// must add its own narrowly-scoped rules below, per CLAUDE.md section 7
-// and SECURITY_AND_TESTING.md. Rules remain the authoritative
-// authorization boundary — never the UI.
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isSelf(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // Looks up the CALLER's own users/{uid} doc to check isAdmin. This is
+    // the only privilege check in the whole ruleset: a client can never
+    // set isAdmin on itself (see the create rule below), so the only way
+    // this is ever true is if another admin, or the project owner via the
+    // Firebase console, set it.
+    function callerIsAdmin() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+
+    match /users/{uid} {
+      // A user can read their own record (to see their approval status).
+      // An admin can read any record (to review pending accounts).
+      allow get: if isSelf(uid) || callerIsAdmin();
+      allow list: if callerIsAdmin();
+
+      // First sign-in creates exactly one doc, for yourself, always
+      // starting 'pending' and never admin. No client input can bypass
+      // this — status and isAdmin are hardcoded requirements here, not
+      // read from the client's request body values.
+      allow create: if isSelf(uid)
+        && request.resource.data.uid == uid
+        && request.resource.data.status == 'pending'
+        && request.resource.data.isAdmin == false
+        && request.resource.data.keys().hasOnly(
+             ['uid', 'email', 'displayName', 'photoURL', 'status', 'isAdmin', 'createdAt', 'updatedAt']
+           );
+
+      // Only an admin can change an account's status, and an admin write
+      // may ONLY touch status/updatedAt — it can't also grant itself or
+      // anyone else isAdmin, and it can't rewrite identity fields.
+      allow update: if callerIsAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt'])
+        && request.resource.data.isAdmin == resource.data.isAdmin
+        && (request.resource.data.status == 'pending'
+            || request.resource.data.status == 'approved'
+            || request.resource.data.status == 'rejected');
+
+      allow delete: if false;
+    }
+
+    // Everything else stays deny-by-default until a later phase defines
+    // its own narrowly-scoped rules here (see ARCHITECTURE.md's
+    // suggested collections list).
     match /{document=**} {
       allow read, write: if false;
     }

@@ -1,6 +1,7 @@
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import { Container } from '../ui/Container';
 import { useAuth } from '../../context/AuthContext';
+import { useUserRecord } from '../../context/UserRecordContext';
 
 const navItems = [
   { to: '/app', label: 'Home', end: true },
@@ -16,6 +17,11 @@ const navItems = [
 
 export function AppShell() {
   const { user, signOutUser } = useAuth();
+  const { record } = useUserRecord();
+
+  const items = record?.isAdmin
+    ? [...navItems, { to: '/app/admin', label: 'Admin', end: false }]
+    : navItems;
 
   return (
     <div className="flex min-h-screen flex-col bg-canvas">
@@ -24,7 +30,10 @@ export function AppShell() {
           <Link to="/app" className="text-title-sm font-haas-disp text-ink">
             SuperConnector
           </Link>
-          <div className="flex items-center gap-md text-body-md text-body">
+          <div className="flex items-center gap-sm text-body-md text-body">
+            {user?.photoURL && (
+              <img src={user.photoURL} alt="" className="h-8 w-8 rounded-full" />
+            )}
             <span>{user?.displayName ?? user?.email}</span>
             <button
               type="button"
@@ -40,7 +49,7 @@ export function AppShell() {
       <div className="flex flex-1">
         <nav className="hidden w-[220px] shrink-0 border-r border-hairline p-lg md:block">
           <ul className="space-y-xs">
-            {navItems.map((item) => (
+            {items.map((item) => (
               <li key={item.to}>
                 <NavLink
                   to={item.to}
