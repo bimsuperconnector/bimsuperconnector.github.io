@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>SuperConnector</title>
+    <script>
+      // GitHub Pages has no server-side rewrites, so a deep link like
+      // /app/directory hits this 404 page directly. We redirect back to
+      // index.html, encoding the original path/query/hash so index.html's
+      // inline script (below) can restore it via history.replaceState
+      // before React Router ever mounts. This keeps clean URLs working
+      // for direct loads and refreshes without a redirect flash on normal
+      // in-app navigation (those never hit this file).
+      var redirectPath = location.pathname + location.search + location.hash;
+      sessionStorage.setItem('sc-redirect', redirectPath);
+      location.replace(location.origin + '/');
+    </script>
+  </head>
+  <body></body>
+</html>

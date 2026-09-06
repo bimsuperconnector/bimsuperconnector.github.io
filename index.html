@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#181d26" />
+    <meta
+      name="description"
+      content="SuperConnector: a private alumni network, directory, and monthly connection engine."
+    />
+    <link rel="icon" href="/assets/branding/logo.ico" />
+    <link rel="apple-touch-icon" href="/assets/branding/logo-192.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <title>SuperConnector</title>
+    <script>
+      // Restore the original deep-linked path saved by 404.html before
+      // React Router mounts, so a hard refresh/direct link to e.g.
+      // /app/directory renders that route instead of the landing page.
+      (function () {
+        var redirect = sessionStorage.getItem('sc-redirect');
+        if (redirect) {
+          sessionStorage.removeItem('sc-redirect');
+          if (redirect !== location.pathname + location.search + location.hash) {
+            history.replaceState(null, '', redirect);
+          }
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

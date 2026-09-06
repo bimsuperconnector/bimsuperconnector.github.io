@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-canvas text-body font-haas antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-haas-disp text-ink;
+  }
+
+  a {
+    @apply text-link;
+  }
+
+  a:active {
+    @apply text-link-active;
+  }
+
+  :focus-visible {
+    outline: 2px solid theme('colors.info-border');
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
