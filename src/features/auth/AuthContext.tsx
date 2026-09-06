@@ -1,35 +1,13 @@
 import { onAuthStateChanged, type User } from "firebase/auth";
-import {
-  createContext,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { auth } from "@/services/firebase/config";
 import {
   ensureUserDocument,
   signInWithGoogle,
   signOutUser,
-  type AppRole,
   type AppUserDoc,
 } from "@/services/firebase/auth";
-
-export const AuthContext = createContext<AuthContextValue | undefined>(
-  undefined,
-);
-
-export interface AuthContextValue {
-  /** Firebase Auth identity, or null when signed out. */
-  user: User | null;
-  /** Firestore users/{uid} document, or null while loading/signed out. */
-  profile: AppUserDoc | null;
-  role: AppRole | null;
-  /** True until the initial auth state + profile fetch resolves. */
-  loading: boolean;
-  signIn: () => Promise<void>;
-  signOut: () => Promise<void>;
-}
+import { AuthContext, type AuthContextValue } from "./auth-context";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
