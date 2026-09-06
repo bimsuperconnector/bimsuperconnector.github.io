@@ -1,7 +1,6 @@
 import { onAuthStateChanged, type User } from "firebase/auth";
 import {
   createContext,
-  useContext,
   useEffect,
   useMemo,
   useState,
@@ -16,7 +15,11 @@ import {
   type AppUserDoc,
 } from "@/services/firebase/auth";
 
-interface AuthContextValue {
+export const AuthContext = createContext<AuthContextValue | undefined>(
+  undefined,
+);
+
+export interface AuthContextValue {
   /** Firebase Auth identity, or null when signed out. */
   user: User | null;
   /** Firestore users/{uid} document, or null while loading/signed out. */
@@ -27,8 +30,6 @@ interface AuthContextValue {
   signIn: () => Promise<void>;
   signOut: () => Promise<void>;
 }
-
-const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -45,7 +46,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const doc = await ensureUserDocument(firebaseUser);
           setProfile(doc);
         } catch (error) {
-          // eslint-disable-next-line no-console
           console.error("Failed to load or create user profile:", error);
           setProfile(null);
         }
@@ -78,12 +78,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return (
     <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
   );
-}
-
-export function useAuth(): AuthContextValue {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
 }
