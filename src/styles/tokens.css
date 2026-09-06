@@ -47,6 +47,7 @@
   --sc-space-lg: 24px;
   --sc-space-xl: 32px;
   --sc-space-xxl: 48px;
+  --sc-space-section: 96px;
 
   /* Typography */
   --sc-font-family:
@@ -56,6 +57,8 @@
   --sc-font-display-lg-weight: 400;
   --sc-font-title-lg-size: 24px;
   --sc-font-title-lg-weight: 400;
+  --sc-font-title-md-size: 20px;
+  --sc-font-title-md-weight: 400;
   --sc-font-title-sm-size: 18px;
   --sc-font-title-sm-weight: 500;
   --sc-font-label-md-size: 16px;

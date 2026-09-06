@@ -3,8 +3,10 @@ import {
   hasErrors,
   parseTagList,
   validateApplicationDraft,
+  validateProfileEditDraft,
   validatePhotoFile,
   type ApplicationDraft,
+  type ProfileEditDraft,
 } from './validation';
 
 function baseDraft(
@@ -66,6 +68,65 @@ describe('validateApplicationDraft', () => {
 
   it('does not require region/degree/skills/interests/networking goals', () => {
     const errors = validateApplicationDraft(baseDraft());
+    expect(errors.region).toBeUndefined();
+    expect(errors.educationDegree).toBeUndefined();
+    expect(errors.skills).toBeUndefined();
+  });
+});
+
+function baseProfileEditDraft(
+  overrides: Partial<ProfileEditDraft> = {},
+): ProfileEditDraft {
+  return {
+    name: 'Alice Alumni',
+    city: 'Bengaluru',
+    region: '',
+    country: 'India',
+    educationInstitution: 'Test University',
+    educationDegree: '',
+    currentOrgName: 'Acme',
+    currentOrgRole: 'Engineer',
+    currentOrgIsStartup: false,
+    previousOrganizations: [],
+    skills: '',
+    interests: '',
+    networkingGoals: '',
+    photoDataUrl: 'data:image/jpeg;base64,AAAA',
+    ...overrides,
+  };
+}
+
+describe('validateProfileEditDraft', () => {
+  it('accepts a fully-filled valid draft, with no batch field to check', () => {
+    const errors = validateProfileEditDraft(baseProfileEditDraft());
+    expect(hasErrors(errors)).toBe(false);
+    expect('batchId' in errors).toBe(false);
+  });
+
+  it('requires name, city, country, institution, current org name/role, and photo', () => {
+    const errors = validateProfileEditDraft(
+      baseProfileEditDraft({
+        name: '',
+        city: '',
+        country: '',
+        educationInstitution: '',
+        currentOrgName: '',
+        currentOrgRole: '',
+        photoDataUrl: null,
+      }),
+    );
+
+    expect(errors.name).toBeDefined();
+    expect(errors.city).toBeDefined();
+    expect(errors.country).toBeDefined();
+    expect(errors.educationInstitution).toBeDefined();
+    expect(errors.currentOrgName).toBeDefined();
+    expect(errors.currentOrgRole).toBeDefined();
+    expect(errors.photoDataUrl).toBeDefined();
+  });
+
+  it('does not require region/degree/skills/interests/networking goals', () => {
+    const errors = validateProfileEditDraft(baseProfileEditDraft());
     expect(errors.region).toBeUndefined();
     expect(errors.educationDegree).toBeUndefined();
     expect(errors.skills).toBeUndefined();

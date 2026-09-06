@@ -1,63 +1,67 @@
 import { useId, useState, type ChangeEvent, type FormEvent } from 'react';
-import { getBatchOptions } from '../../config/batches';
+import { findBatchOption } from '../../config/batches';
 import {
   hasErrors,
-  validateApplicationDraft,
+  validateProfileEditDraft,
   validatePhotoFile,
-  type ApplicationDraft,
-  type FieldErrors,
+  type ProfileEditDraft,
+  type ProfileFieldErrors,
 } from '../../domain/onboarding/validation';
 import { compressPhotoFile } from '../../domain/onboarding/photo';
-import { submitApplication } from '../../services/firebase/firestore';
-import type { OrganizationEntry } from '../../domain/onboarding/types';
+import { updateProfile } from '../../services/firebase/firestore';
+import type {
+  OrganizationEntry,
+  ProfileApplication,
+} from '../../domain/onboarding/types';
 import { Field } from '../../components/FormField';
 import { OrganizationHistoryFieldset } from '../../components/OrganizationHistoryFieldset';
 
-const BATCH_OPTIONS = getBatchOptions();
-
-function emptyOrganization(): OrganizationEntry {
-  return { name: '', role: '', isStartup: false };
-}
-
-function emptyDraft(defaultName: string): ApplicationDraft {
+function draftFromProfile(profile: ProfileApplication): ProfileEditDraft {
   return {
-    name: defaultName,
-    batchId: '',
-    city: '',
-    region: '',
-    country: '',
-    educationInstitution: '',
-    educationDegree: '',
-    currentOrgName: '',
-    currentOrgRole: '',
-    currentOrgIsStartup: false,
-    previousOrganizations: [],
-    skills: '',
-    interests: '',
-    networkingGoals: '',
-    photoDataUrl: null,
+    name: profile.name,
+    city: profile.location.city,
+    region: profile.location.region,
+    country: profile.location.country,
+    educationInstitution: profile.education.institution,
+    educationDegree: profile.education.degree ?? '',
+    currentOrgName: profile.currentOrganization.name,
+    currentOrgRole: profile.currentOrganization.role,
+    currentOrgIsStartup: profile.currentOrganization.isStartup,
+    previousOrganizations: profile.previousOrganizations,
+    skills: profile.skills.join(', '),
+    interests: profile.interests.join(', '),
+    networkingGoals: profile.networkingGoals,
+    photoDataUrl: profile.photoDataUrl,
   };
 }
 
-interface ApplicationFormProps {
+interface ProfileEditFormProps {
   uid: string;
-  account: { email: string | null; fallbackDisplayName: string };
+  profile: ProfileApplication;
+  onSaved: () => void;
+  onCancel: () => void;
 }
 
-export function ApplicationForm({ uid, account }: ApplicationFormProps) {
-  const [draft, setDraft] = useState<ApplicationDraft>(() =>
-    emptyDraft(account.fallbackDisplayName),
+export function ProfileEditForm({
+  uid,
+  profile,
+  onSaved,
+  onCancel,
+}: ProfileEditFormProps) {
+  const [draft, setDraft] = useState<ProfileEditDraft>(() =>
+    draftFromProfile(profile),
   );
-  const [errors, setErrors] = useState<FieldErrors>({});
+  const [errors, setErrors] = useState<ProfileFieldErrors>({});
   const [photoError, setPhotoError] = useState<string | null>(null);
   const [photoProcessing, setPhotoProcessing] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const formId = useId();
+  const batch = findBatchOption(profile.batchId);
 
-  function updateField<K extends keyof ApplicationDraft>(
+  function updateField<K extends keyof ProfileEditDraft>(
     key: K,
-    value: ApplicationDraft[K],
+    value: ProfileEditDraft[K],
   ) {
     setDraft((prev) => ({ ...prev, [key]: value }));
   }
@@ -76,7 +80,7 @@ export function ApplicationForm({ uid, account }: ApplicationFormProps) {
       ...prev,
       previousOrganizations: [
         ...prev.previousOrganizations,
-        emptyOrganization(),
+        { name: '', role: '', isStartup: false },
       ],
     }));
   }
@@ -111,45 +115,37 @@ export function ApplicationForm({ uid, account }: ApplicationFormProps) {
       );
     } finally {
       setPhotoProcessing(false);
-      // Allow re-selecting the same file name after an error.
       event.target.value = '';
     }
   }
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
-    const fieldErrors = validateApplicationDraft(draft);
+    const fieldErrors = validateProfileEditDraft(draft);
     setErrors(fieldErrors);
-    setSubmitError(null);
+    setSaveError(null);
 
     if (hasErrors(fieldErrors)) return;
 
-    setSubmitting(true);
+    setSaving(true);
     try {
-      await submitApplication(uid, account, draft);
-      // No local "success" state needed: the caller re-renders based on
-      // the now-created /users/{uid} doc via the real-time subscription.
+      await updateProfile(uid, draft);
+      onSaved();
     } catch (err) {
-      setSubmitError(
+      setSaveError(
         err instanceof Error
           ? err.message
-          : 'Could not submit your application. Please try again.',
+          : 'Could not save your profile. Please try again.',
       );
-      setSubmitting(false);
+      setSaving(false);
     }
   }
 
   return (
     <form className="application-form" onSubmit={handleSubmit} noValidate>
-      <p className="form-intro">
-        This information is shared with alumni you connect with and with
-        moderators reviewing your application. See the{' '}
-        <a href="/privacy">Privacy Policy</a> for details.
-      </p>
-
-      {submitError && (
+      {saveError && (
         <p role="alert" className="form-error">
-          {submitError}
+          {saveError}
         </p>
       )}
 
@@ -195,22 +191,17 @@ export function ApplicationForm({ uid, account }: ApplicationFormProps) {
           )}
         </div>
 
-        <Field id={`${formId}-batch`} label="BIM batch" error={errors.batchId}>
-          <select
-            id={`${formId}-batch`}
-            value={draft.batchId}
-            aria-invalid={!!errors.batchId}
-            onChange={(e) => updateField('batchId', e.target.value)}
-            required
-          >
-            <option value="">Select your batch…</option>
-            {BATCH_OPTIONS.map((option) => (
-              <option key={option.id} value={option.id}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </Field>
+        <div className="form-field">
+          <span className="form-static-label">BIM batch</span>
+          <p className="form-static-value">
+            {batch?.label ?? profile.batchId}
+            <span className="form-hint form-static-note">
+              {' '}
+              — batch can&apos;t be changed here; contact an admin if this is
+              wrong.
+            </span>
+          </p>
+        </div>
       </fieldset>
 
       <fieldset className="form-fieldset">
@@ -330,13 +321,23 @@ export function ApplicationForm({ uid, account }: ApplicationFormProps) {
         </Field>
       </fieldset>
 
-      <button
-        type="submit"
-        className="btn-primary"
-        disabled={submitting || photoProcessing}
-      >
-        {submitting ? 'Submitting…' : 'Submit application'}
-      </button>
+      <div className="profile-edit-actions">
+        <button
+          type="submit"
+          className="btn-primary"
+          disabled={saving || photoProcessing}
+        >
+          {saving ? 'Saving…' : 'Save changes'}
+        </button>
+        <button
+          type="button"
+          className="btn-secondary"
+          onClick={onCancel}
+          disabled={saving}
+        >
+          Cancel
+        </button>
+      </div>
     </form>
   );
 }

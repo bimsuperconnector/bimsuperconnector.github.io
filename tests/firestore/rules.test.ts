@@ -360,3 +360,121 @@ describe('batch-moderator scope', () => {
     expect(snapshot.docs.map((d) => d.id)).toEqual(['alice']);
   });
 });
+
+// Phase 2 — Profiles & batch management: controlled self-editing on
+// /profiles/{uid}. See firebase/firestore.rules' `allow update` block
+// above the catch-all, and SECURITY_AND_TESTING.md's Firestore test
+// list ("owned-profile editing; protected-field denial").
+describe('owned-profile editing', () => {
+  it('the owner can update their own editable profile content', async () => {
+    await seedUser({ uid: 'alice', role: 'member' });
+    await seedProfile('alice');
+    const db = testEnv.authenticatedContext('alice').firestore();
+
+    await assertSucceeds(
+      updateDoc(doc(db, 'profiles', 'alice'), {
+        name: 'Alice A. Alumni',
+        skills: ['Revit', 'BIM Coordination'],
+        currentOrganization: {
+          name: 'New Co',
+          role: 'Senior Engineer',
+          isStartup: true,
+        },
+        updatedAt: serverTimestamp(),
+      }),
+    );
+  });
+
+  it('cannot change batchId while editing their own profile', async () => {
+    await seedUser({ uid: 'alice', role: 'member' });
+    await seedProfile('alice', 'BIM35');
+    const db = testEnv.authenticatedContext('alice').firestore();
+
+    await assertFails(
+      updateDoc(doc(db, 'profiles', 'alice'), {
+        batchId: 'BIM43',
+        updatedAt: serverTimestamp(),
+      }),
+    );
+  });
+
+  it('cannot change uid while editing their own profile', async () => {
+    await seedUser({ uid: 'alice', role: 'member' });
+    await seedProfile('alice');
+    const db = testEnv.authenticatedContext('alice').firestore();
+
+    await assertFails(
+      updateDoc(doc(db, 'profiles', 'alice'), {
+        uid: 'someone-else',
+        updatedAt: serverTimestamp(),
+      }),
+    );
+  });
+
+  it('cannot change createdAt while editing their own profile', async () => {
+    await seedUser({ uid: 'alice', role: 'member' });
+    await seedProfile('alice');
+    const db = testEnv.authenticatedContext('alice').firestore();
+
+    await assertFails(
+      updateDoc(doc(db, 'profiles', 'alice'), {
+        createdAt: new Date('2020-01-01'),
+        updatedAt: serverTimestamp(),
+      }),
+    );
+  });
+
+  it('rejects an oversized photo on update', async () => {
+    await seedUser({ uid: 'alice', role: 'member' });
+    await seedProfile('alice');
+    const db = testEnv.authenticatedContext('alice').firestore();
+
+    await assertFails(
+      updateDoc(doc(db, 'profiles', 'alice'), {
+        photoDataUrl: 'x'.repeat(200_001),
+        updatedAt: serverTimestamp(),
+      }),
+    );
+  });
+
+  it('rejects an unexpected extra field on update', async () => {
+    await seedUser({ uid: 'alice', role: 'member' });
+    await seedProfile('alice');
+    const db = testEnv.authenticatedContext('alice').firestore();
+
+    await assertFails(
+      updateDoc(doc(db, 'profiles', 'alice'), {
+        connectionScore: 1200,
+        updatedAt: serverTimestamp(),
+      }),
+    );
+  });
+
+  it("cannot update another person's profile", async () => {
+    await seedUser({ uid: 'alice', role: 'member' });
+    await seedProfile('alice');
+    await seedUser({ uid: 'bob', role: 'member' });
+    const db = testEnv.authenticatedContext('bob').firestore();
+
+    await assertFails(
+      updateDoc(doc(db, 'profiles', 'alice'), {
+        name: 'Hijacked Name',
+        updatedAt: serverTimestamp(),
+      }),
+    );
+  });
+
+  it('an admin cannot edit profile content through this rule (review only touches /users)', async () => {
+    await seedUser({ uid: 'admin1', role: 'applicationAdmin' });
+    await seedUser({ uid: 'alice', role: 'member' });
+    await seedProfile('alice');
+    const db = testEnv.authenticatedContext('admin1').firestore();
+
+    await assertFails(
+      updateDoc(doc(db, 'profiles', 'alice'), {
+        name: 'Reviewer Edited This',
+        updatedAt: serverTimestamp(),
+      }),
+    );
+  });
+});

@@ -13,7 +13,10 @@ import {
   type Unsubscribe,
 } from 'firebase/firestore';
 import { db } from './firebase';
-import type { ApplicationDraft } from '../../domain/onboarding/validation';
+import type {
+  ApplicationDraft,
+  ProfileEditDraft,
+} from '../../domain/onboarding/validation';
 import { parseTagList } from '../../domain/onboarding/validation';
 import { buildNormalizedLocation } from '../../config/locations';
 import type {
@@ -136,6 +139,61 @@ export async function submitApplication(
   });
   batch.set(profileDocRef(uid), profile);
   await batch.commit();
+}
+
+/**
+ * Phase 2 controlled self-editing: updates the caller's own
+ * `/profiles/{uid}` content. `uid`, `batchId`, and `createdAt` are
+ * never sent here — they're protected/frozen fields (see
+ * ProfileEditDraft's doc comment and the corresponding `allow update`
+ * rule in firebase/firestore.rules, which independently re-verifies
+ * they cannot change). Reuses the exact same normalization
+ * (buildNormalizedLocation, parseTagList, trimming) as
+ * `submitApplication` so editing produces data in the same shape as
+ * the original application.
+ */
+export async function updateProfile(
+  uid: string,
+  draft: ProfileEditDraft,
+): Promise<void> {
+  if (!draft.photoDataUrl) {
+    throw new Error('A profile photo is required.');
+  }
+
+  const name = draft.name.trim();
+  const location = buildNormalizedLocation(
+    draft.city,
+    draft.region,
+    draft.country,
+  );
+
+  await updateDoc(profileDocRef(uid), {
+    name,
+    photoDataUrl: draft.photoDataUrl,
+    location,
+    education: {
+      institution: draft.educationInstitution.trim(),
+      ...(draft.educationDegree.trim()
+        ? { degree: draft.educationDegree.trim() }
+        : {}),
+    },
+    currentOrganization: {
+      name: draft.currentOrgName.trim(),
+      role: draft.currentOrgRole.trim(),
+      isStartup: draft.currentOrgIsStartup,
+    },
+    previousOrganizations: draft.previousOrganizations
+      .filter((entry) => entry.name.trim() || entry.role.trim())
+      .map((entry) => ({
+        name: entry.name.trim(),
+        role: entry.role.trim(),
+        isStartup: entry.isStartup,
+      })),
+    skills: parseTagList(draft.skills),
+    interests: parseTagList(draft.interests),
+    networkingGoals: draft.networkingGoals.trim(),
+    updatedAt: serverTimestamp(),
+  });
 }
 
 /** Resets a rejected application back to pending for another look.

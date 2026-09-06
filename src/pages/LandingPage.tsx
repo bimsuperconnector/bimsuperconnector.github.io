@@ -8,14 +8,14 @@ import { Link } from 'react-router-dom';
  */
 export function LandingPage() {
   return (
-    <section aria-labelledby="landing-heading">
+    <section aria-labelledby="landing-heading" className="hero-band">
       <h1 id="landing-heading">SuperConnector</h1>
-      <p>
+      <p className="hero-subhead">
         A private, free professional network for verified BIM alumni — profiles,
         monthly networking, jobs, ventures, and events.
       </p>
       <p>
-        <Link to="/login" className="cta">
+        <Link to="/login" className="btn-primary">
           Sign in to continue
         </Link>
       </p>

@@ -18,15 +18,20 @@ export function LoginPage() {
   }
 
   return (
-    <section aria-labelledby="login-heading">
+    <section aria-labelledby="login-heading" className="hero-band login-band">
       <h1 id="login-heading">Sign in</h1>
-      <p>Use your Google account to sign in.</p>
+      <p className="hero-subhead">Use your Google account to sign in.</p>
       {error && (
         <p role="alert" className="form-error">
           {error}
         </p>
       )}
-      <button type="button" onClick={signInWithGoogle} disabled={loading}>
+      <button
+        type="button"
+        className="btn-primary"
+        onClick={signInWithGoogle}
+        disabled={loading}
+      >
         Sign in with Google
       </button>
       <p className="legal-note">

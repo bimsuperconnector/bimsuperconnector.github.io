@@ -80,16 +80,25 @@ textarea:focus-visible,
   outline-offset: 2px;
 }
 
+/* --- Buttons ---------------------------------------------------------
+ * Mirrors Design-superconnector.md's button-primary/button-secondary:
+ * 16px x 24px padding, {rounded.lg} (12px), {typography.button}
+ * (16px/500). The system documents no bare "plain button" variant, so
+ * the unstyled <button> element defaults to the button-secondary
+ * treatment (canvas background, hairline outline) and .btn-primary
+ * opts in to the one-per-viewport near-black CTA on top of it.
+ * ---------------------------------------------------------------- */
+
 button {
   min-height: 44px;
   min-width: 44px;
-  padding: var(--sc-space-xs) var(--sc-space-md);
+  padding: var(--sc-space-md) var(--sc-space-lg);
   cursor: pointer;
   font-family: inherit;
   font-size: var(--sc-font-label-md-size);
   font-weight: var(--sc-font-label-md-weight);
   border-radius: var(--sc-radius-lg);
-  border: 1px solid transparent;
+  border: 1px solid var(--sc-color-hairline);
   background: var(--sc-color-canvas);
   color: var(--sc-color-ink);
 }
@@ -97,6 +106,7 @@ button {
 .btn-primary {
   background: var(--sc-color-primary);
   color: var(--sc-color-on-primary);
+  border-color: transparent;
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -107,6 +117,22 @@ button {
   background: var(--sc-color-canvas);
   color: var(--sc-color-ink);
   border: 1px solid var(--sc-color-hairline);
+}
+
+/* Links styled as buttons (e.g. the landing/login primary CTA) need
+   their own layout rules since `button`'s element selector doesn't
+   apply to <a>. */
+a.btn-primary,
+a.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: var(--sc-space-md) var(--sc-space-lg);
+  border-radius: var(--sc-radius-lg);
+  font-size: var(--sc-font-label-md-size);
+  font-weight: var(--sc-font-label-md-weight);
+  text-decoration: none;
 }
 
 .btn-small {
@@ -145,8 +171,8 @@ button:disabled {
 
 .app-main {
   flex: 1;
-  padding: var(--sc-space-lg);
-  max-width: 720px;
+  padding: var(--sc-space-xl) var(--sc-space-lg);
+  max-width: 760px;
   width: 100%;
   margin: 0 auto;
 }
@@ -159,6 +185,31 @@ button:disabled {
 .footer-note {
   color: var(--sc-color-muted);
   font-size: var(--sc-font-body-md-size);
+}
+
+/* --- Hero band (Landing / Login) ------------------------------------
+ * Per Design-superconnector.md's `hero-band`: white canvas, no card, no
+ * gradient — the brand strength comes from generous whitespace and
+ * type. {spacing.section} (96px) is the documented vertical rhythm for
+ * a full editorial band; applied here rather than on every dense form
+ * page, where 96px of top/bottom padding would read as broken empty
+ * space rather than calm whitespace.
+ * ---------------------------------------------------------------- */
+
+.hero-band {
+  padding: var(--sc-space-section) 0;
+  text-align: left;
+}
+
+.hero-subhead {
+  font-size: var(--sc-font-title-md-size);
+  font-weight: var(--sc-font-title-md-weight);
+  color: var(--sc-color-body);
+  max-width: 52ch;
+}
+
+.login-band {
+  padding-top: var(--sc-space-xxl);
 }
 
 .form-error {
@@ -221,6 +272,27 @@ button:disabled {
   min-height: unset;
 }
 
+/* text-input-focus: border recolors to the info-border blue on focus,
+ * layered alongside (not instead of) the :focus-visible outline ring
+ * above, which is left untouched for keyboard-navigation accessibility. */
+.form-field input[type='text']:focus,
+.form-field select:focus,
+.form-field textarea:focus {
+  border-color: var(--sc-color-info-border);
+}
+
+.form-static-label {
+  font-weight: var(--sc-font-label-md-weight);
+}
+
+.form-static-value {
+  margin: 0;
+}
+
+.form-static-note {
+  color: var(--sc-color-muted);
+}
+
 .form-checkbox {
   display: flex;
   align-items: center;
@@ -265,6 +337,148 @@ button:disabled {
   background: var(--sc-color-signature-cream);
   border-radius: var(--sc-radius-md);
   padding: var(--sc-space-lg);
+}
+
+/* --- Chips (skills, interests, batch, startup marker) ---------------
+ * Deliberately {rounded.sm} (6px), not {rounded.pill} — the pill shape
+ * is reserved for the pricing sub-system per Design-superconnector.md's
+ * Do's/Don'ts ("Don't use {rounded.pill} outside the pricing surface").
+ * ---------------------------------------------------------------- */
+
+.chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sc-space-xs);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.chip {
+  display: inline-block;
+  background: var(--sc-color-surface-soft);
+  color: var(--sc-color-body);
+  border-radius: var(--sc-radius-sm);
+  padding: var(--sc-space-xxs) var(--sc-space-sm);
+  font-size: var(--sc-font-body-md-size);
+}
+
+.chip-accent {
+  background: var(--sc-color-signature-cream);
+  color: var(--sc-color-ink);
+  margin-left: var(--sc-space-xs);
+}
+
+/* --- Profile view/edit (Phase 2) -------------------------------------
+ * Card treatment follows `feature-card-tabbed`: surface-soft
+ * background, {rounded.lg}, {spacing.xl} internal padding.
+ * ---------------------------------------------------------------- */
+
+.profile-card {
+  background: var(--sc-color-surface-soft);
+  border-radius: var(--sc-radius-lg);
+  padding: var(--sc-space-xl);
+}
+
+.profile-card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--sc-space-md);
+  margin-bottom: var(--sc-space-lg);
+  flex-wrap: wrap;
+}
+
+.profile-photo {
+  border-radius: var(--sc-radius-full);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.profile-name {
+  margin: 0 0 var(--sc-space-xxs);
+}
+
+.profile-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--sc-space-sm);
+  color: var(--sc-color-muted);
+  font-size: var(--sc-font-body-md-size);
+  margin: 0;
+}
+
+.profile-edit-btn {
+  margin-left: auto;
+}
+
+.profile-detail-fields dt {
+  font-weight: var(--sc-font-label-md-weight);
+  margin-top: var(--sc-space-md);
+}
+
+.profile-detail-fields dd {
+  margin: var(--sc-space-xxs) 0 0;
+}
+
+.profile-org-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sc-space-xxs);
+}
+
+.profile-edit-actions {
+  display: flex;
+  gap: var(--sc-space-sm);
+}
+
+/* --- Dashboard quick links -------------------------------------------
+ * Follows `demo-grid-card`: canvas background, {rounded.md}, {spacing.md}
+ * internal padding.
+ * ---------------------------------------------------------------- */
+
+.dashboard-greeting {
+  color: var(--sc-color-muted);
+}
+
+.dashboard-links {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--sc-space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sc-space-sm);
+}
+
+.dashboard-link-card {
+  display: block;
+  background: var(--sc-color-canvas);
+  border: 1px solid var(--sc-color-hairline);
+  border-radius: var(--sc-radius-md);
+  padding: var(--sc-space-md);
+  text-decoration: none;
+  color: var(--sc-color-ink);
+}
+
+.dashboard-link-title {
+  display: block;
+  font-weight: var(--sc-font-label-md-weight);
+  font-size: var(--sc-font-label-md-size);
+  color: var(--sc-color-ink);
+}
+
+.dashboard-link-desc {
+  display: block;
+  color: var(--sc-color-muted);
+  font-size: var(--sc-font-body-md-size);
+  margin-top: var(--sc-space-xxs);
+}
+
+.dashboard-note {
+  color: var(--sc-color-muted);
+  font-size: var(--sc-font-body-md-size);
 }
 
 /* --- Review queue ---------------------------------------------------- */

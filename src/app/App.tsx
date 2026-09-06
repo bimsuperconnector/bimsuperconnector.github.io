@@ -11,6 +11,7 @@ import { PrivacyPage } from '../pages/PrivacyPage';
 import { DashboardPage } from '../pages/DashboardPage';
 import { OnboardingPage } from '../features/onboarding/OnboardingPage';
 import { ReviewQueuePage } from '../features/review/ReviewQueuePage';
+import { ProfilePage } from '../features/profile/ProfilePage';
 
 export function App() {
   return (
@@ -35,6 +36,14 @@ export function App() {
               element={
                 <PortalRoute>
                   <DashboardPage />
+                </PortalRoute>
+              }
+            />
+            <Route
+              path="profile"
+              element={
+                <PortalRoute>
+                  <ProfilePage />
                 </PortalRoute>
               }
             />

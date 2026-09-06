@@ -106,11 +106,16 @@ service cloud.firestore {
 
     // -----------------------------------------------------------------
     // /profiles/{uid} — the application/profile content the person
-    // filled in. Create-only from the client in Phase 1: no Phase 1
-    // feature edits a profile after submission (Phase 2 "Profiles &
-    // batch management" adds controlled self-editing and its own
-    // `allow update` rule then, per the project's least-privilege
-    // pattern of adding scope only when a feature needs it).
+    // filled in. Create-only from the client in Phase 1. Phase 2
+    // ("Profiles & batch management") adds controlled self-editing
+    // below: the owner may update their own profile content, but
+    // `uid`, `batchId`, and `createdAt` stay frozen — `batchId` in
+    // particular must never drift from the denormalized copy on
+    // `/users/{uid}` that batch-moderator review-queue queries rely
+    // on (see Phase 1's ProfileApplication doc comment). Reviewers get
+    // no update path here at all; review decisions only ever touch
+    // `/users/{uid}` (role/reviewedBy/reviewedAt), never profile
+    // content — consistent with least privilege.
     // -----------------------------------------------------------------
     match /profiles/{uid} {
       allow get: if isSelf(uid) || canReview(resource);
@@ -131,7 +136,21 @@ service cloud.firestore {
              'currentOrganization', 'previousOrganizations', 'skills', 'interests',
              'networkingGoals', 'createdAt', 'updatedAt']);
 
-      allow update: if false;
+      allow update: if isSelf(uid)
+        // Protected/frozen fields: identical to what's already stored.
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.batchId == resource.data.batchId
+        && request.resource.data.createdAt == resource.data.createdAt
+        // Same content validation as create.
+        && request.resource.data.name is string && request.resource.data.name.size() > 0
+        && request.resource.data.photoDataUrl is string
+        && request.resource.data.photoDataUrl.size() > 0
+        && request.resource.data.photoDataUrl.size() < 200000
+        && request.resource.data.keys().hasOnly([
+             'uid', 'name', 'photoDataUrl', 'batchId', 'location', 'education',
+             'currentOrganization', 'previousOrganizations', 'skills', 'interests',
+             'networkingGoals', 'createdAt', 'updatedAt']);
+
       allow delete: if false;
     }
 

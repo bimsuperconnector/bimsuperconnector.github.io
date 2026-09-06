@@ -20,11 +20,29 @@ export interface ApplicationDraft {
 
 export type FieldErrors = Partial<Record<keyof ApplicationDraft, string>>;
 
-export function validateApplicationDraft(draft: ApplicationDraft): FieldErrors {
-  const errors: FieldErrors = {};
+/**
+ * The editable subset of ApplicationDraft used by Phase 2's controlled
+ * self-editing (`ProfileEditForm`). `batchId` is deliberately excluded:
+ * it is a protected, frozen field (denormalized onto `/users` for
+ * batch-moderator review-queue scoping — see Phase 1's
+ * ProfileApplication doc comment and firebase/firestore.rules), so
+ * there is no batch selector on the edit form at all.
+ */
+export type ProfileEditDraft = Omit<ApplicationDraft, 'batchId'>;
+
+export type ProfileFieldErrors = Partial<
+  Record<keyof ProfileEditDraft, string>
+>;
+
+/** Validation shared by both the initial application (create) and the
+ * profile edit (update) flows — everything except the batch selector,
+ * which only the initial application has. */
+function validateSharedProfileFields(
+  draft: ProfileEditDraft,
+): ProfileFieldErrors {
+  const errors: ProfileFieldErrors = {};
 
   if (!draft.name.trim()) errors.name = 'Enter your full name.';
-  if (!draft.batchId) errors.batchId = 'Select your BIM batch.';
   if (!draft.city.trim()) errors.city = 'Enter your current city.';
   if (!draft.country.trim()) errors.country = 'Enter your current country.';
   if (!draft.educationInstitution.trim()) {
@@ -43,7 +61,20 @@ export function validateApplicationDraft(draft: ApplicationDraft): FieldErrors {
   return errors;
 }
 
-export function hasErrors(errors: FieldErrors): boolean {
+export function validateApplicationDraft(draft: ApplicationDraft): FieldErrors {
+  const errors: FieldErrors = { ...validateSharedProfileFields(draft) };
+  if (!draft.batchId) errors.batchId = 'Select your BIM batch.';
+  return errors;
+}
+
+/** Validates a Phase 2 profile edit draft (no batch field to check). */
+export function validateProfileEditDraft(
+  draft: ProfileEditDraft,
+): ProfileFieldErrors {
+  return validateSharedProfileFields(draft);
+}
+
+export function hasErrors(errors: Record<string, string | undefined>): boolean {
   return Object.keys(errors).length > 0;
 }
 
