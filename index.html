@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/icons/logo-192.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#181d26" />
+    <meta
+      name="description"
+      content="SuperConnector — a private, free, professional BIM alumni network and networking platform."
+    />
+    <title>SuperConnector</title>
+    <script>
+      // Pairs with public/404.html: restores the real path after GitHub
+      // Pages' 404 fallback redirected here with ?redirect=/original/path.
+      (function () {
+        var params = new URLSearchParams(window.location.search);
+        var redirect = params.get("redirect");
+        if (redirect) {
+          window.history.replaceState(null, "", redirect);
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

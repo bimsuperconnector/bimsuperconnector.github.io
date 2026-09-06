@@ -1,0 +1,21 @@
+<!doctype html>
+<!--
+  GitHub Pages has no server-side routing, so a direct load of e.g.
+  /dashboard returns this 404.html. We redirect to / with the original
+  path encoded in a query string; the inline script in index.html then
+  restores it via history.replaceState so React Router picks up the
+  right route. This is the standard rafgraph/spa-github-pages approach.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>SuperConnector</title>
+    <script>
+      var path = window.location.pathname + window.location.search + window.location.hash;
+      window.location.replace(
+        window.location.origin + "/?redirect=" + encodeURIComponent(path),
+      );
+    </script>
+  </head>
+  <body></body>
+</html>

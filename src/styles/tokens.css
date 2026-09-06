@@ -1,0 +1,64 @@
+/*
+  Design tokens transcribed from /Design-superconnector.md (authoritative).
+  Do not hand-edit values here without updating that source file first —
+  this file must always mirror it.
+*/
+:root {
+  /* Brand & surfaces */
+  --color-primary: #181d26;
+  --color-primary-active: #0d1218;
+  --color-ink: #181d26;
+  --color-body: #333840;
+  --color-muted: #41454d;
+  --color-hairline: #dddddd;
+  --color-border-strong: #9297a0;
+  --color-canvas: #ffffff;
+  --color-surface-soft: #f8fafc;
+  --color-surface-strong: #e0e2e6;
+  --color-surface-dark: #181d26;
+  --color-surface-dark-elevated: #1d1f25;
+
+  /* Signature surfaces */
+  --color-signature-coral: #aa2d00;
+  --color-signature-forest: #0a2e0e;
+  --color-signature-cream: #f5e9d4;
+  --color-signature-peach: #fcab79;
+  --color-signature-mint: #a8d8c4;
+  --color-signature-yellow: #f4d35e;
+  --color-signature-mustard: #d9a441;
+
+  --color-on-primary: #ffffff;
+  --color-on-dark: #ffffff;
+
+  /* Semantic */
+  --color-link: #1b61c9;
+  --color-link-active: #1a3866;
+  --color-info: #254fad;
+  --color-info-border: #458fff;
+  --color-success: #006400;
+  --color-success-border: #39bf45;
+
+  /* Type */
+  --font-display: "Haas Groot Disp", "Inter Display", system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-body: "Haas", "Inter", system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, sans-serif;
+
+  /* Radius */
+  --radius-xs: 2px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-pill: 9999px;
+  --radius-full: 9999px;
+
+  /* Spacing (4px base unit) */
+  --space-xxs: 4px;
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-xxl: 48px;
+  --space-section: 96px;
+}
