@@ -27,7 +27,6 @@ function assertConfigured(config: FirebaseOptions): void {
     // Fail loudly in dev rather than silently calling an unconfigured
     // Firebase project. In production this should never trigger because
     // the GitHub Actions build injects real values.
-    // eslint-disable-next-line no-console
     console.error(
       `Firebase config is missing required field(s): ${missing.join(", ")}. ` +
         "Did you create a .env file from .env.example?",
