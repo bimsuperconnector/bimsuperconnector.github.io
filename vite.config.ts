@@ -34,7 +34,7 @@ export default defineConfig(({ mode }) => {
           short_name: 'SuperConnector',
           description:
             'A private, free professional network for verified BIM alumni.',
-          theme_color: '#1a1a1a',
+          theme_color: '#181d26',
           background_color: '#ffffff',
           display: 'standalone',
           start_url: basePath,
@@ -69,6 +69,11 @@ export default defineConfig(({ mode }) => {
       environment: 'jsdom',
       globals: true,
       setupFiles: ['./src/tests/setup.ts'],
+      // Firestore rules tests live under /tests and need a running
+      // emulator + node environment — see vitest.rules.config.ts and
+      // the `test:rules` script, run separately from this app test
+      // suite.
+      exclude: ['**/node_modules/**', 'tests/**'],
     },
   };
 });

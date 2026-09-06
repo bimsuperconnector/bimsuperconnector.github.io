@@ -1,0 +1,65 @@
+/*
+ * Design tokens, mirrored from Design-superconnector.md (owner-supplied,
+ * authoritative). Only the tokens relevant to application UI (forms,
+ * nav, cards, buttons) are pulled in here — the marketing-only
+ * sub-systems (signature full-bleed voltage cards, the pricing dialect
+ * and its pill buttons) are deliberately left out: this is app UI, not
+ * a marketing site, and Design-superconnector.md's own Do's/Don'ts say
+ * not to use `{rounded.pill}` outside the pricing surface.
+ *
+ * Font family falls back to system-ui per Design-superconnector.md's
+ * "Note on Font Substitutes" — Haas Grotesk is a licensed font this
+ * project does not ship.
+ */
+
+:root {
+  /* Colors */
+  --sc-color-primary: #181d26;
+  --sc-color-primary-active: #0d1218;
+  --sc-color-ink: #181d26;
+  --sc-color-body: #333840;
+  --sc-color-muted: #41454d;
+  --sc-color-hairline: #dddddd;
+  --sc-color-border-strong: #9297a0;
+  --sc-color-canvas: #ffffff;
+  --sc-color-surface-soft: #f8fafc;
+  --sc-color-surface-strong: #e0e2e6;
+  --sc-color-signature-cream: #f5e9d4;
+  --sc-color-on-primary: #ffffff;
+  --sc-color-link: #1b61c9;
+  --sc-color-link-active: #1a3866;
+  --sc-color-info-border: #458fff;
+  --sc-color-success: #006400;
+  --sc-color-error: #b3261e;
+
+  /* Radius */
+  --sc-radius-xs: 2px;
+  --sc-radius-sm: 6px;
+  --sc-radius-md: 10px;
+  --sc-radius-lg: 12px;
+  --sc-radius-full: 9999px;
+
+  /* Spacing */
+  --sc-space-xxs: 4px;
+  --sc-space-xs: 8px;
+  --sc-space-sm: 12px;
+  --sc-space-md: 16px;
+  --sc-space-lg: 24px;
+  --sc-space-xl: 32px;
+  --sc-space-xxl: 48px;
+
+  /* Typography */
+  --sc-font-family:
+    'Haas', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  --sc-font-display-lg-size: 40px;
+  --sc-font-display-lg-weight: 400;
+  --sc-font-title-lg-size: 24px;
+  --sc-font-title-lg-weight: 400;
+  --sc-font-title-sm-size: 18px;
+  --sc-font-title-sm-weight: 500;
+  --sc-font-label-md-size: 16px;
+  --sc-font-label-md-weight: 500;
+  --sc-font-body-md-size: 14px;
+  --sc-font-body-md-weight: 400;
+}

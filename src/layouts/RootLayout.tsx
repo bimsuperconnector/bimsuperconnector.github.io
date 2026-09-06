@@ -1,11 +1,9 @@
 import { Link, Outlet } from 'react-router-dom';
 
 /**
- * Shared shell for every page. Deliberately unstyled beyond basic,
- * accessible structure — Design-superconnector.md (colors, typography,
- * spacing, components) has not been supplied yet, so no visual design
- * decisions are baked in here. Once that file exists, this layout is
- * where its design system gets applied.
+ * Shared shell for every page. Styled with Design-superconnector.md's
+ * tokens via src/index.css / src/styles/tokens.css (now that the owner
+ * has supplied that file) — see CLAUDE.md's Design section.
  */
 export function RootLayout() {
   return (

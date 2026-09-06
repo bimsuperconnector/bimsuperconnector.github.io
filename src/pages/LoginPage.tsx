@@ -5,15 +5,16 @@ import { useAuth } from '../features/auth/AuthContext';
  * Google Sign-In only. SuperConnector never collects or stores Google
  * passwords — Firebase Authentication handles the OAuth flow entirely.
  *
- * Phase 0 scope: sign in and land on the (protected) dashboard
- * placeholder. The pending → review → approved/rejected application
- * flow described in CLAUDE.md is implemented in Phase 1.
+ * After sign-in, people land on /onboarding, which itself decides what
+ * to show (application form, pending/rejected status, or a redirect
+ * straight to /dashboard) based on their `/users/{uid}` record — see
+ * OnboardingPage.
  */
 export function LoginPage() {
   const { user, loading, error, signInWithGoogle } = useAuth();
 
   if (!loading && user) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/onboarding" replace />;
   }
 
   return (

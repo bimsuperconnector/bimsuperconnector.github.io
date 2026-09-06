@@ -31,6 +31,15 @@ jobs:
       - name: Unit tests
         run: npm run test
 
+      - name: Set up Java (for the Firestore emulator)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Firestore rules tests
+        run: npm run test:rules:emulator
+
       - name: Production build
         run: npm run build
         env:
