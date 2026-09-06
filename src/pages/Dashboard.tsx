@@ -1,4 +1,4 @@
-import { useAuth } from "@/features/auth/AuthContext";
+import { useAuth } from "@/features/auth/useAuth";
 
 export function Dashboard() {
   const { profile } = useAuth();
