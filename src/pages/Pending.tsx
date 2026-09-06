@@ -1,4 +1,4 @@
-import { useAuth } from "@/features/auth/AuthContext";
+import { useAuth } from "@/features/auth/useAuth";
 
 /**
  * Shown to signed-in users whose role is "pending" or "rejected". The
