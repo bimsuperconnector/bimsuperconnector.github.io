@@ -22,6 +22,38 @@ service cloud.firestore {
         && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
     }
 
+    // A caller must be an *approved* member (not just signed in) before
+    // they can create/edit a profile — this is the authoritative check;
+    // ProtectedRoute in the app is only a UX convenience on top of it.
+    function callerIsApproved() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'approved';
+    }
+
+    // Keep this ceiling in sync with CURRENT_MAX_BATCH_NUMBER in
+    // src/lib/batches.ts. null is allowed (batch not yet selected).
+    function isValidBatchNumber(n) {
+      return n == null || (n is int && n >= 1 && n <= 43);
+    }
+
+    function isValidProfileShape(data) {
+      return data.headline is string && data.headline.size() <= 120
+        && data.bio is string && data.bio.size() <= 1000
+        && data.location is string && data.location.size() <= 120
+        && data.organizations is list && data.organizations.size() <= 10
+        && data.education is list && data.education.size() <= 10
+        && data.skills is list && data.skills.size() <= 20
+        && data.interests is list && data.interests.size() <= 20
+        && data.links is map
+        && data.isComplete is bool
+        && isValidBatchNumber(data.batchNumber)
+        && data.keys().hasOnly(
+             ['uid', 'batchNumber', 'headline', 'bio', 'location', 'organizations',
+              'education', 'skills', 'interests', 'links', 'isComplete', 'createdAt', 'updatedAt']
+           );
+    }
+
     match /users/{uid} {
       // A user can read their own record (to see their approval status).
       // An admin can read any record (to review pending accounts).
@@ -49,6 +81,29 @@ service cloud.firestore {
         && (request.resource.data.status == 'pending'
             || request.resource.data.status == 'approved'
             || request.resource.data.status == 'rejected');
+
+      allow delete: if false;
+    }
+
+    match /profiles/{uid} {
+      // No directory yet (Phase 3), so profile reads stay scoped to the
+      // owner and admins only — deliberately NOT opened to "any approved
+      // member" yet. Phase 3 will widen this deliberately, together with
+      // the pagination/indexing it needs, rather than this phase silently
+      // pre-opening a capability with no UI to use it responsibly.
+      allow get: if isSelf(uid) || callerIsAdmin();
+      allow list: if callerIsAdmin();
+
+      allow create: if isSelf(uid) && callerIsApproved()
+        && request.resource.data.uid == uid
+        && isValidProfileShape(request.resource.data);
+
+      // Admins can also correct a member's profile (e.g. wrong batch),
+      // per Phase 2's "Admin/batch moderator controls" — a full batch
+      // moderator role scoped to specific batches is Phase 11.
+      allow update: if ((isSelf(uid) && callerIsApproved()) || callerIsAdmin())
+        && request.resource.data.uid == uid
+        && isValidProfileShape(request.resource.data);
 
       allow delete: if false;
     }
